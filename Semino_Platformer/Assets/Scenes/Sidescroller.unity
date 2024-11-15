@@ -224,7 +224,7 @@ GameObject:
   m_Component:
   - component: {fileID: 874392358}
   - component: {fileID: 874392359}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1653,7 +1653,7 @@ GameObject:
   - component: {fileID: 1433354313}
   - component: {fileID: 1433354318}
   - component: {fileID: 1433354319}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1697,6 +1697,7 @@ MonoBehaviour:
   currentDirection: 0
   acceleration: 0
   maxSpeed: 0
+  distanceGround: 0
 --- !u!4 &1433354315
 Transform:
   m_ObjectHideFlags: 0
@@ -1743,8 +1744,8 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_GravityScale: 1
+  m_Material: {fileID: 6200000, guid: 228da704b057b5c428b8338d937cf229, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1809,7 +1810,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1598075210}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}

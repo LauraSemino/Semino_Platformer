@@ -8,6 +8,9 @@ public class PlayerController : MonoBehaviour
     public FacingDirection currentDirection;
     public float acceleration;
     public int maxSpeed;
+    public float distanceGround;
+
+
     public enum FacingDirection
     {
         left, right
@@ -45,11 +48,14 @@ public class PlayerController : MonoBehaviour
         acceleration = 0;
         if (playerInput.x < 0)
         {
-            acceleration = -0.5f;
+            acceleration = -4f;
+            currentDirection = FacingDirection.left;
+            
         }
         if(playerInput.x > 0)
         {
-            acceleration = 0.5f;
+            acceleration = 4f;
+            currentDirection = FacingDirection.right;
         }
         
         //SKRigidBody.velocity *= new Vector2(0.9f, 0);
@@ -57,31 +63,60 @@ public class PlayerController : MonoBehaviour
         SKRigidBody.AddForce(new Vector2(acceleration, 0), ForceMode2D.Force);
         if (SKRigidBody.velocity.x > 5)
         {
-            SKRigidBody.velocity = new Vector2(5,0);
+            SKRigidBody.velocity = new Vector2(5,SKRigidBody.velocity.y);
+            
         }
         if (SKRigidBody.velocity.x < -5)
         {
-            SKRigidBody.velocity = new Vector2(-5, 0);
+            SKRigidBody.velocity = new Vector2(-5, SKRigidBody.velocity.y);
+            
+        }
+
+        RaycastHit2D lfGround = Physics2D.Raycast(transform.position, -Vector2.up);
+        if (lfGround)
+        {
+            distanceGround = Mathf.Abs(lfGround.point.y - transform.position.y);
+
         }
     }
 
     public bool IsWalking()
     {
-        return false;
+        if (IsGrounded() == true && (SKRigidBody.velocity.x > 0 || SKRigidBody.velocity.x < 0))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        
     }
     public bool IsGrounded()
     {
-        return true;
+       
+        if (distanceGround < 0.66)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public FacingDirection GetFacingDirection()
     {
-       
-        //return FacingDirection.right;
+        if (currentDirection == FacingDirection.right)
+        {
+            return FacingDirection.right;
+        }
+        else
+        {
+            return FacingDirection.left;
+        }
         
-       
-        return FacingDirection.left;
-        
-    
+            
+
     }
 }
