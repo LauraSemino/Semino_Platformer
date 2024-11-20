@@ -8,7 +8,9 @@ public class PlayerController : MonoBehaviour
     public FacingDirection currentDirection;
     public float acceleration;
     public int maxSpeed;
-    public float distanceGround;
+    public float distanceGroundL;
+    public float distanceGroundR;
+    
     public float apexHeight;
     public float apexTime;
     public float gravity;
@@ -17,7 +19,9 @@ public class PlayerController : MonoBehaviour
     public float terminalVel;
     public float coyoteTime;
 
-    public float proxyTime;
+    public float friction;
+
+    
 
     public enum FacingDirection
     {
@@ -29,6 +33,7 @@ public class PlayerController : MonoBehaviour
     {
         initJumpVel = (2 * apexHeight / apexTime);
         SKRigidBody = GetComponent<Rigidbody2D>();
+        
     }
 
     // Update is called once per frame
@@ -75,9 +80,11 @@ public class PlayerController : MonoBehaviour
         if (coyoteTime > 0)
         {
             acceleration = 200;
+            friction = 30;
         }
         else
         {
+            friction = 0;
             acceleration = 20;
         }
         if (playerInput.x < 0)
@@ -100,25 +107,17 @@ public class PlayerController : MonoBehaviour
 
         if (currentVelocity.x > 0.1)
         {
+            currentVelocity.x -= friction * Time.deltaTime;
             currentDirection = FacingDirection.right;
 
         }
         if (currentVelocity.x < -0.1)
         {
+            currentVelocity.x += friction * Time.deltaTime;
             currentDirection = FacingDirection.left;
         }
-        if (currentVelocity.y < 0 && coyoteTime <= 0)
-        {
-            proxyTime -= Time.deltaTime;
-            if (proxyTime <= 0)
-            {
-                currentVelocity += initJumpVel * Vector2.up;
-            }
-        }
-        else
-        {
-            proxyTime = 5f;
-        }
+        
+       
         
         
 
@@ -140,20 +139,25 @@ public class PlayerController : MonoBehaviour
             currentVelocity.y = terminalVel;
         }
 
-        RaycastHit2D lfGround = Physics2D.Raycast(transform.position, -Vector2.up);
-        if (lfGround)
+       
+        RaycastHit2D lfGroundL = Physics2D.Raycast(new Vector2 (transform.position.x + 0.4f, transform.position.y), -Vector2.up);
+        RaycastHit2D lfGroundR = Physics2D.Raycast(new Vector2(transform.position.x - 0.4f, transform.position.y), -Vector2.up);
+        
+        if (lfGroundL && lfGroundR)
         {
-            distanceGround = Mathf.Abs(lfGround.point.y - transform.position.y);
+            
+            distanceGroundL = Mathf.Abs(lfGroundL.point.y - transform.position.y);
+            distanceGroundR = Mathf.Abs(lfGroundR.point.y - transform.position.y);
 
         }
-        Debug.Log(currentVelocity);
+        //Debug.Log(currentVelocity);
         SKRigidBody.velocity = currentVelocity;
 
     }
 
     public bool IsWalking()
     {
-        Debug.Log(IsGrounded());
+        //Debug.Log(IsGrounded());
         if (coyoteTime > 0 && (SKRigidBody.velocity.x > 0.2 || SKRigidBody.velocity.x < -0.2))
         {
             return true;
@@ -167,9 +171,9 @@ public class PlayerController : MonoBehaviour
     public bool IsGrounded()
     {
        
-        if (distanceGround < 0.66)
+        if (distanceGroundL < 0.66 || distanceGroundR < 0.66)
         {
-            coyoteTime = 0.3f;
+            coyoteTime = 0.2f;
             return true;
     
         }
