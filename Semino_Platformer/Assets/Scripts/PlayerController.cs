@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,12 +22,18 @@ public class PlayerController : MonoBehaviour
 
     public float friction;
 
-    
+    public int health = 10;
 
     public enum FacingDirection
     {
         left, right
     }
+    public enum CharacterState
+    {
+        idle, walk, jump, die
+    }
+    public CharacterState currentCharacterState = CharacterState.idle;
+    public CharacterState previousCharacterState = CharacterState.idle;
 
     // Start is called before the first frame update
     void Start()
@@ -55,6 +62,47 @@ public class PlayerController : MonoBehaviour
             playerInput.y = 1;
         }
         
+        switch(currentCharacterState)
+        {
+            case CharacterState.die:
+                break;
+            case CharacterState.jump:
+                if(IsGrounded())
+                {
+                    if(IsWalking())
+                    {
+                        currentCharacterState = CharacterState.walk;
+                    }
+                    else
+                    {
+                        currentCharacterState = CharacterState.idle;
+                    }
+                }
+                break;
+            case CharacterState.walk:
+                if (!IsWalking())
+                {
+                    currentCharacterState = CharacterState.idle;
+                }
+                if (coyoteTime <= 0)
+                {
+                    currentCharacterState = CharacterState.jump;
+                }
+                break;
+            case CharacterState.idle:
+                if(IsWalking())
+                {
+                    currentCharacterState = CharacterState.walk;
+                }
+                if(coyoteTime <= 0)
+                {
+                    currentCharacterState = CharacterState.jump;
+                }
+                break;
+
+        }
+
+
         MovementUpdate(playerInput);
         //Debug.Log(playerInput.x);
 
@@ -68,7 +116,10 @@ public class PlayerController : MonoBehaviour
         }
         
     }
-
+    public bool IsDead()
+    {
+        return health <= 0;
+    }    
     private void MovementUpdate(Vector2 playerInput)
     {
 
@@ -171,7 +222,7 @@ public class PlayerController : MonoBehaviour
     public bool IsGrounded()
     {
        
-        if (distanceGroundL < 0.66 || distanceGroundR < 0.66)
+        if (distanceGroundL < 0.05 || distanceGroundR < 0.05)
         {
             coyoteTime = 0.2f;
             return true;
