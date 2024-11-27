@@ -24,6 +24,8 @@ public class PlayerController : MonoBehaviour
 
     public int health = 10;
 
+    public bool isSliding;
+
     public enum FacingDirection
     {
         left, right
@@ -49,6 +51,7 @@ public class PlayerController : MonoBehaviour
         //The input from the player needs to be determined and then passed in the to the MovementUpdate which should
         //manage the actual movement of the character.
         Vector2 playerInput = new Vector2();
+        
         if (Input.GetKey(KeyCode.A))
         {
             playerInput.x = -1;
@@ -61,10 +64,26 @@ public class PlayerController : MonoBehaviour
         {
             playerInput.y = 1;
         }
+        if (coyoteTime > 0)
+        {
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                isSliding = true;
+            }
+            else
+            {
+                isSliding = false;
+            }
+        }
         
+        previousCharacterState = currentCharacterState;
+
+        
+
         switch(currentCharacterState)
         {
             case CharacterState.die:
+
                 break;
             case CharacterState.jump:
                 if(IsGrounded())
@@ -99,11 +118,15 @@ public class PlayerController : MonoBehaviour
                     currentCharacterState = CharacterState.jump;
                 }
                 break;
-
+            
+        }
+        if (IsDead() == true)
+        {
+            currentCharacterState = CharacterState.die;
         }
 
-
         MovementUpdate(playerInput);
+       
         //Debug.Log(playerInput.x);
 
         if (IsGrounded() == false && coyoteTime <= 0)
@@ -120,13 +143,20 @@ public class PlayerController : MonoBehaviour
     {
         return health <= 0;
     }    
+    private void onDeathAnimationDone()
+    {
+        gameObject.SetActive(false);
+    }
+   
     private void MovementUpdate(Vector2 playerInput)
     {
-
         Vector2 currentVelocity = SKRigidBody.velocity;
-
         gravity = (-2 * apexHeight / (Mathf.Pow(apexTime, 2)));
         currentVelocity += gravity*Time.deltaTime * Vector2.up;
+
+        
+
+
         //SKRigidBody.AddForce(new Vector2(0, gravity*Time.deltaTime), ForceMode2D.Force);
         if (coyoteTime > 0)
         {
@@ -151,7 +181,15 @@ public class PlayerController : MonoBehaviour
         }
         if(playerInput.y > 0 && coyoteTime > 0)
         {
-            currentVelocity += initJumpVel * Vector2.up;
+            if (isSliding == false)
+            {
+                currentVelocity += initJumpVel * Vector2.up;
+            }
+            if (isSliding == true)
+            {
+                currentVelocity += (initJumpVel/2) * Vector2.up;
+            }
+            
             //SKRigidBody.AddForce(new Vector2(0, initJumpVel), ForceMode2D.Impulse);
         }
 
@@ -167,23 +205,44 @@ public class PlayerController : MonoBehaviour
             currentVelocity.x += friction * Time.deltaTime;
             currentDirection = FacingDirection.left;
         }
-        
-       
-        
-        
+
+        if (isSliding == true)
+        {
+            if(currentDirection == FacingDirection.right && coyoteTime > 0)
+            {
+                currentVelocity += 5 * Vector2.left * Time.deltaTime;
+            }
+            if(currentDirection == FacingDirection.left && coyoteTime > 0)
+            {
+                currentVelocity -= 5 * Vector2.left * Time.deltaTime;
+            }
+            
+         }
+
+
 
         //SKRigidBody.velocity *= new Vector2(0.9f, 0);
 
         //SKRigidBody.AddForce(new Vector2(acceleration, 0), ForceMode2D.Force);
-        if (SKRigidBody.velocity.x > 7)
+        if (SKRigidBody.velocity.x > 7 && isSliding == false)
         {
             currentVelocity.x = 7;
             
         }
-        if (SKRigidBody.velocity.x < -7)
+        if (SKRigidBody.velocity.x < -7 && isSliding == false)
         {
             currentVelocity.x = -7;
             
+        }
+        if (SKRigidBody.velocity.x > 15 && isSliding == true)
+        {
+            currentVelocity.x = 15;
+
+        }
+        if (SKRigidBody.velocity.x < -15 && isSliding == true)
+        {
+            currentVelocity.x = -15;
+
         }
         if (SKRigidBody.velocity.y < terminalVel)
         {
