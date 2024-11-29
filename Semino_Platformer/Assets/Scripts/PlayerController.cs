@@ -187,7 +187,7 @@ public class PlayerController : MonoBehaviour
             }
             if (isSliding == true)
             {
-                currentVelocity += (initJumpVel/2) * Vector2.up;
+                currentVelocity += initJumpVel/2 * Vector2.up;
             }
             
             //SKRigidBody.AddForce(new Vector2(0, initJumpVel), ForceMode2D.Impulse);
@@ -208,13 +208,16 @@ public class PlayerController : MonoBehaviour
 
         if (isSliding == true)
         {
-            if(currentDirection == FacingDirection.right && coyoteTime > 0)
+            //gives the player a minimum speed so they are always moving while sliding
+            if (currentDirection == FacingDirection.right && coyoteTime > 0 && currentVelocity.x < 10)
             {
-                currentVelocity += 5 * Vector2.left * Time.deltaTime;
+                currentVelocity.x = 10;
+               
             }
-            if(currentDirection == FacingDirection.left && coyoteTime > 0)
+            if(currentDirection == FacingDirection.left && coyoteTime > 0 && currentVelocity.x > -10)
             {
-                currentVelocity -= 5 * Vector2.left * Time.deltaTime;
+                currentVelocity.x = -10;
+                
             }
             
          }
